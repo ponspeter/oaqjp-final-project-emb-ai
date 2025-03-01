@@ -14,42 +14,34 @@ def emotion_detector(text_to_analyze):
     # Sending a POST request to the emotion analysis API
     response = requests.post(url, json=myobj, headers=header)
     
-    # Check if the response is valid
-    if response.status_code == 200:
-        # Format the response
-        formatted_response = response.json()
-        
-        # Extract emotion scores
-        emotions = formatted_response.get('emotionPredictions', [{}])[0].get('emotion', {})
-        
-        # Ensure all emotions exist in the response, defaulting to 0 if missing
-        dominant_emotion = max(emotions, key=emotions.get, default="none")
-        ordered_response = {
-            "anger": emotions.get("anger"),
-            "disgust": emotions.get("disgust"),
-            "fear": emotions.get("fear"),
-            "joy": emotions.get("joy"),
-            "sadness": emotions.get("sadness"),
-        }
-        
-        # Add dominant emotion at the end
-        ordered_response["dominant_emotion"] = dominant_emotion
-        
-        return ordered_response
-    elif response.status_code == 400:
-        
-        ordered_response = {
-            "anger": None,
-            "disgust": None,
-            "fear": None,
-            "joy": None,
-            "sadness": None,
-        }
-        
-        # Add dominant emotion at the end
-        ordered_response["dominant_emotion"] = None
-        
-        return ordered_response
+    # get the status code
+    status_code = response.status_code
+    print(status_code)
+
+    if status_code == 400:
+        return_response = { 'anger': None,
+                             'disgust': None,
+                             'fear': None,
+                             'joy': None,
+                             'sadness': None,
+                             'dominant_emotion': None }
+    else:
+        # format the response
+        formatted_response = json.loads(response.text)
+
+        # extract the emotion predictions
+        return_response = formatted_response['emotionPredictions'][0]['emotion']
+
+        # get the dominant emotio
+        dominant_emotion = max(return_response, key = lambda x: return_response[x])
+
+        # add dominant_emotion in the return response
+        return_response['dominant_emotion'] = dominant_emotion
+
+    #  return response
+    return return_response
+
+    
 
     
     
