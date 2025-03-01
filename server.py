@@ -1,3 +1,7 @@
+"""
+This module provides an emotion detection function that sends text input
+to an external API and returns the predicted emotions with a dominant emotion.
+"""
 from flask import Flask, render_template, request
 from EmotionDetection.emotion_detection import emotion_detector
 
@@ -5,7 +9,12 @@ app = Flask("Emotion Detector")
 
 @app.route("/emotionDetector")
 def sent_detector():
-
+    """
+    API endpoint to perform emotion detection on input text.
+    
+    Returns:
+        str or dict: A message indicating invalid input or a JSON response with emotion scores.
+    """
     # Retrieve the text to analyze from the request arguments
     text_to_analyze = request.args.get('textToAnalyze')
 
@@ -14,14 +23,19 @@ def sent_detector():
 
     if response['dominant_emotion'] is None:
         return "Invalid text! Please try again!"
-    else:
-        # Return a formatted string with the sentiment label and score
-        return response
+
+    return response
 
 @app.route("/")
 def render_index_page():
+    """
+    Renders the index page for the web application.
+    
+    Returns:
+        str: Rendered HTML page.
+    """
     return render_template('index.html')
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001)
+    app.run(host="0.0.0.0", port=5000)
