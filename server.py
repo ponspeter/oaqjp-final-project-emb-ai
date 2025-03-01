@@ -11,9 +11,12 @@ def sent_detector():
 
     # Pass the text to the sentiment_analyzer function and store the response
     response = emotion_detector(text_to_analyze)
-    
-    # Return a formatted string with the sentiment label and score
-    return response
+
+    if response['dominant_emotion'] is None:
+        return "Invalid text! Please try again!"
+    else:
+        # Return a formatted string with the sentiment label and score
+        return response
 
 @app.route("/")
 def render_index_page():
@@ -21,4 +24,4 @@ def render_index_page():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)

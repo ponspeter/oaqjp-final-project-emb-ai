@@ -15,26 +15,41 @@ def emotion_detector(text_to_analyze):
     response = requests.post(url, json=myobj, headers=header)
     
     # Check if the response is valid
-    if response.status_code != 200:
-        return {"error": "Failed to fetch emotion data"}
+    if response.status_code == 200:
+        # Format the response
+        formatted_response = response.json()
+        
+        # Extract emotion scores
+        emotions = formatted_response.get('emotionPredictions', [{}])[0].get('emotion', {})
+        
+        # Ensure all emotions exist in the response, defaulting to 0 if missing
+        dominant_emotion = max(emotions, key=emotions.get, default="none")
+        ordered_response = {
+            "anger": emotions.get("anger"),
+            "disgust": emotions.get("disgust"),
+            "fear": emotions.get("fear"),
+            "joy": emotions.get("joy"),
+            "sadness": emotions.get("sadness"),
+        }
+        
+        # Add dominant emotion at the end
+        ordered_response["dominant_emotion"] = dominant_emotion
+        
+        return ordered_response
+    elif response.status_code == 400:
+        
+        ordered_response = {
+            "anger": None,
+            "disgust": None,
+            "fear": None,
+            "joy": None,
+            "sadness": None,
+        }
+        
+        # Add dominant emotion at the end
+        ordered_response["dominant_emotion"] = None
+        
+        return ordered_response
+
     
-    # Format the response
-    formatted_response = response.json()
     
-    # Extract emotion scores
-    emotions = formatted_response.get('emotionPredictions', [{}])[0].get('emotion', {})
-    
-    # Ensure all emotions exist in the response, defaulting to 0 if missing
-    dominant_emotion = max(emotions, key=emotions.get, default="none")
-    ordered_response = {
-        "anger": emotions.get("anger", 0.0),
-        "disgust": emotions.get("disgust", 0.0),
-        "fear": emotions.get("fear", 0.0),
-        "joy": emotions.get("joy", 0.0),
-        "sadness": emotions.get("sadness", 0.0),
-    }
-    
-    # Add dominant emotion at the end
-    ordered_response["dominant_emotion"] = dominant_emotion
-    
-    return ordered_response
