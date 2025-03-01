@@ -13,25 +13,28 @@ def emotion_detector(text_to_analyze):
     
     # Sending a POST request to the emotion analysis API
     response = requests.post(url, json=myobj, headers=header)
-
-    # format the response
-    formatted_response = json.loads(response.text)
-
+    
+    # Check if the response is valid
+    if response.status_code != 200:
+        return {"error": "Failed to fetch emotion data"}
+    
+    # Format the response
+    formatted_response = response.json()
+    
     # Extract emotion scores
-    emotions = formatted_response['emotionPredictions'][0]['emotion']
+    emotions = formatted_response.get('emotionPredictions', [{}])[0].get('emotion', {})
     
-    # Determine the dominant emotion
-    dominant_emotion = max(emotions, key=emotions.get)
-    
-    # Construct the final response
-    final_response = {
-        "anger": emotions["anger"],
-        "disgust": emotions["disgust"],
-        "fear": emotions["fear"],
-        "joy": emotions["joy"],
-        "sadness": emotions["sadness"],
-        "dominant_emotion": dominant_emotion
+    # Ensure all emotions exist in the response, defaulting to 0 if missing
+    dominant_emotion = max(emotions, key=emotions.get, default="none")
+    ordered_response = {
+        "anger": emotions.get("anger", 0.0),
+        "disgust": emotions.get("disgust", 0.0),
+        "fear": emotions.get("fear", 0.0),
+        "joy": emotions.get("joy", 0.0),
+        "sadness": emotions.get("sadness", 0.0),
     }
     
-    # Returning a final response containing emotion predict results
-    return final_response
+    # Add dominant emotion at the end
+    ordered_response["dominant_emotion"] = dominant_emotion
+    
+    return ordered_response
